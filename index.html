@@ -72,9 +72,25 @@
 
   <script>
     let contadorTurnos = 1;
-
     const form = document.getElementById('formTurno');
     const tabla = document.getElementById('tablaTurnos');
+
+    // Guardar turnos en localStorage
+    function guardarTurnos() {
+      localStorage.setItem('turnosHTML', tabla.innerHTML);
+      localStorage.setItem('contadorTurnos', contadorTurnos);
+    }
+
+    // Cargar turnos guardados al iniciar
+    window.addEventListener('DOMContentLoaded', () => {
+      const turnosGuardados = localStorage.getItem('turnosHTML');
+      const contadorGuardado = localStorage.getItem('contadorTurnos');
+
+      if (turnosGuardados) {
+        tabla.innerHTML = turnosGuardados;
+        contadorTurnos = parseInt(contadorGuardado) || 1;
+      }
+    });
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -95,17 +111,19 @@
       `;
 
       tabla.appendChild(fila);
-
       contadorTurnos++;
+
+      guardarTurnos(); // Guardar en localStorage
 
       form.reset();
       document.getElementById('fechaHora').focus();
     });
 
-    // Evento para borrar
+    // Borrar turno y actualizar localStorage
     tabla.addEventListener('click', function(e) {
       if (e.target.classList.contains('btn-borrar')) {
         e.target.closest('tr').remove();
+        guardarTurnos();
       }
     });
   </script>
