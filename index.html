@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Turnos Bancarios</title>
   <style>
     body {
@@ -33,11 +33,11 @@
       text-align: center;
     }
     th {
-      background: #2b0594;
+      background: #e60000;
       color: white;
     }
     .btn-borrar {
-      background-color: #2b0594;
+      background-color: #f44336;
       color: white;
       border: none;
       cursor: pointer;
@@ -49,9 +49,9 @@
   <h1>Registro de Turnos</h1>
 
   <form id="formTurno">
-    <input type="datetime-local" id="fechaHora" required>
-    <input type="text" id="nombre" placeholder="Nombre" required>
-    <input type="tel" id="telefono" placeholder="Teléfono" required>
+    <input type="datetime-local" id="fechaHora" required />
+    <input type="text" id="nombre" placeholder="Nombre" required />
+    <input type="tel" id="telefono" placeholder="Teléfono" required />
     <button type="submit">Agregar Turno</button>
   </form>
 
@@ -66,64 +66,84 @@
       </tr>
     </thead>
     <tbody id="tablaTurnos">
-      <!-- Filas agregadas dinámicamente -->
+      <!-- Aquí van los turnos en tiempo real -->
     </tbody>
   </table>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
-    let contadorTurnos = 1;
+    const firebaseConfig = {
+      apiKey: "AIzaSyCl-0McC6Tb5CEXL49bFSweZJFsK1x1Psg",
+      authDomain: "turnos-d705f.firebaseapp.com",
+      databaseURL: "https://turnos-d705f-default-rtdb.firebaseio.com",
+      projectId: "turnos-d705f",
+      storageBucket: "turnos-d705f.firebasestorage.app",
+      messagingSenderId: "153210080712",
+      appId: "1:153210080712:web:805ed2fd8bcefa742104fd"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const form = document.getElementById('formTurno');
     const tabla = document.getElementById('tablaTurnos');
 
-    // Guardar turnos en localStorage
-    function guardarTurnos() {
-      localStorage.setItem('turnosHTML', tabla.innerHTML);
-      localStorage.setItem('contadorTurnos', contadorTurnos);
-    }
+    let contadorTurnos = 1;
 
-    // Cargar turnos guardados al iniciar
-    window.addEventListener('DOMContentLoaded', () => {
-      const turnosGuardados = localStorage.getItem('turnosHTML');
-      const contadorGuardado = localStorage.getItem('contadorTurnos');
-
-      if (turnosGuardados) {
-        tabla.innerHTML = turnosGuardados;
-        contadorTurnos = parseInt(contadorGuardado) || 1;
+    // Escuchar cambios en tiempo real y actualizar tabla
+    db.ref('turnos').on('value', snapshot => {
+      tabla.innerHTML = '';
+      const turnos = snapshot.val();
+      if (turnos) {
+        // Ordenar turnos por número
+        const ordenados = Object.values(turnos).sort((a, b) => a.numero - b.numero);
+        ordenados.forEach(turno => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${turno.numero.toString().padStart(3, '0')}</td>
+            <td>${turno.fechaHora}</td>
+            <td>${turno.nombre}</td>
+            <td>${turno.telefono}</td>
+            <td><button class="btn-borrar" data-id="${turno.id}">Borrar</button></td>
+          `;
+          tabla.appendChild(fila);
+          contadorTurnos = Math.max(contadorTurnos, turno.numero + 1);
+        });
       }
     });
 
-    form.addEventListener('submit', function(e) {
+    // Agregar un nuevo turno
+    form.addEventListener('submit', e => {
       e.preventDefault();
 
       const fechaHora = document.getElementById('fechaHora').value;
-      const nombre = document.getElementById('nombre').value;
-      const telefono = document.getElementById('telefono').value;
+      const nombre = document.getElementById('nombre').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
 
-      const turno = contadorTurnos.toString().padStart(3, '0');
+      if (!fechaHora || !nombre || !telefono) {
+        alert('Por favor, completa todos los campos.');
+        return;
+      }
 
-      const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>${turno}</td>
-        <td>${fechaHora}</td>
-        <td>${nombre}</td>
-        <td>${telefono}</td>
-        <td><button class="btn-borrar">Borrar</button></td>
-      `;
+      const numero = contadorTurnos;
+      const id = db.ref().child('turnos').push().key;
+      const nuevoTurno = { id, numero, fechaHora, nombre, telefono };
 
-      tabla.appendChild(fila);
+      db.ref('turnos/' + id).set(nuevoTurno);
+
       contadorTurnos++;
-
-      guardarTurnos(); // Guardar en localStorage
-
       form.reset();
       document.getElementById('fechaHora').focus();
     });
 
-    // Borrar turno y actualizar localStorage
-    tabla.addEventListener('click', function(e) {
+    // Borrar un turno
+    tabla.addEventListener('click', e => {
       if (e.target.classList.contains('btn-borrar')) {
-        e.target.closest('tr').remove();
-        guardarTurnos();
+        const id = e.target.getAttribute('data-id');
+        db.ref('turnos/' + id).remove();
       }
     });
   </script>
