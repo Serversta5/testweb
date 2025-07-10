@@ -2,105 +2,113 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ejemplo de Página Web con Aside</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="css/index.css">
+  <title>Turnos Bancarios</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+    }
+    form, table {
+      margin: 20px auto;
+      width: 90%;
+      max-width: 700px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #e60000;
+      color: white;
+    }
+    .btn-borrar {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-  <header>
-    <h1>Mi Página Web</h1>
-  </header>
+  <h1>Registro de Turnos</h1>
 
-  <nav>
-    <ul>
-      <li><a href="#articulo1"><i class="fa-solid fa-house"></i>Artículo 1</a></li>
-      <li><a href="#articulo2"><i class="fa-solid fa-magnifying-glass"></i>Artículo 2</a></li>
-      <li><a href="#articulo3"> <i class="fa-regular fa-comment"></i>Artículo 3</a></li>
-      <li><a href="#seccion1">Sección 1</a></li>
-    </ul>
-  </nav>
+  <form id="formTurno">
+    <input type="datetime-local" id="fechaHora" required>
+    <input type="text" id="nombre" placeholder="Nombre" required>
+    <input type="tel" id="telefono" placeholder="Teléfono" required>
+    <button type="submit">Agregar Turno</button>
+  </form>
 
-  <main>
-    <div class="content">
-      <article id="articulo1">
-       <h2><i class="fa-brands fa-github"></i>Artículo 1</h2>
-       <picture>
-        <source srcset="" type="image/webp">
-        <img src="image/road-6204694_1280.jpg" alt="Descripción de la imagen del artículo 1" style="max-width: 100%; height: auto;">
-    </picture>
-        <p>Este es el contenido del primer artículo. Puedes ir a la <a href="#seccion1">Sección 1</a>.</p>
-      </article>
+  <table>
+    <thead>
+      <tr>
+        <th>Turno</th>
+        <th>Fecha y Hora</th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaTurnos">
+      <!-- Filas agregadas dinámicamente -->
+    </tbody>
+  </table>
 
-      <article id="articulo2">
-        <h2><i class="fas fa-book icono"></i>Artículo 2</h2>
-        <picture>
-            <source srcset="" type="image/webp">
-            <img src="image/pixel-art-7280249_1280.png" alt="Descripción de la imagen del artículo 1" style="max-width: 100%; height: auto;">
-        </picture>
-        <p>Contenido del segundo artículo. Mira la <a href="#seccion2">Sección 2</a> para más información.</p>
-      </article>
+  <script>
+    let contadorTurnos = 1;
 
-      <article id="articulo3">
-        <h2><i class="fas fa-lightbulb icono"></i> Artículo 3</h2>
-        <picture>
-            <source srcset="" type="image/webp">
-            <img src="image/coast-9549731_1280.png" alt="Descripción de la imagen del artículo 1" style="max-width: 100%; height: auto;">
-        </picture>
-        <p>Último artículo de esta página. Enlace a la <a href="#seccion3">Sección 3</a>.</p>
-      </article>
+    const form = document.getElementById('formTurno');
+    const tabla = document.getElementById('tablaTurnos');
 
-      <section id="seccion1">
-        <h3>Sección 1</h3>
-        <ol>
-          <li>Elemento uno</li>
-          <li>Elemento dos</li>
-          <li>Elemento tres</li>
-        </ol>
-        <p>Este es el contenido del primer artículo. Puedes ir a la <a href="#articulo1">artículo 1</a>.</p>
-      </section>
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
 
-      <section id="seccion2">
-        <h3>Sección 2</h3>
-        <ol>
-          <li>Paso A</li>
-          <li>Paso B</li>
-          <li>Paso C</li>
-        </ol>
+      const fechaHora = document.getElementById('fechaHora').value;
+      const nombre = document.getElementById('nombre').value;
+      const telefono = document.getElementById('telefono').value;
 
-        <p>Este es el contenido del segundo artículo. Puedes ir a la <a href="#articulo2">artículo 2</a>.</p>
-      </section>
+      const turno = contadorTurnos.toString().padStart(3, '0');
 
-      <section id="seccion3">
-        <h3>Sección 3</h3>
-        <ol>
-          <li>Primero</li>
-          <li>Segundo</li>
-          <li>Tercero</li>
-        </ol>
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${turno}</td>
+        <td>${fechaHora}</td>
+        <td>${nombre}</td>
+        <td>${telefono}</td>
+        <td><button class="btn-borrar">Borrar</button></td>
+      `;
 
-        <p>Este es el contenido del tercer artículo. Puedes ir a la <a href="#articulo2">artículo 3</a>.</p>
-      </section>
-    </div>
+      tabla.appendChild(fila);
 
-    <aside>
-      <h3>Menú Lateral</h3>
-      <nav>
-        <ul>
-          <li><a href="#articulo1">Ir a Artículo 1</a></li>
-          <li><a href="#articulo2">Ir a Artículo 2</a></li>
-          <li><a href="#seccion1">Ir a Sección 1</a></li>
-          <li><a href="#seccion3">Ir a Sección 3</a></li>
-        </ul>
-      </nav>
-    </aside>
-  </main>
+      contadorTurnos++;
 
-  <footer>
-    <p>© 2025 Mi Sitio Web</p>
-  </footer>
+      form.reset();
+      document.getElementById('fechaHora').focus();
+    });
+
+    // Evento para borrar
+    tabla.addEventListener('click', function(e) {
+      if (e.target.classList.contains('btn-borrar')) {
+        e.target.closest('tr').remove();
+      }
+    });
+  </script>
 
 </body>
 </html>
